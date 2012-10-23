@@ -1,19 +1,15 @@
 import pygame
 
-
 import Objects
 import sys
         
 def main():
     SCREEN_WIDTH = 1024
     SCREEN_HEIGHT = 558
-    
     NUMBER_OF_HUMANS = 3
     NUMBER_OF_ZOMBIES = 3
     humanArray = []
     zombieArray = []
-    zombieImageArray = []
-    humanImageArray = []
     counter = 0
     print 'hello'
    
@@ -35,16 +31,16 @@ def main():
     while counter != NUMBER_OF_HUMANS:
         filename = 'Human'.__add__(str(counter+1)).__add__(".gif")
         tempHuman = Objects.Mob('human', 'lobby', filename, False)
-        tempImage = pygame.image.load(filename)
-        humanImageArray.append(tempImage)
+        #tempHuman.__init__('human', 'lobby', filename, False)
+        tempHuman.set_position(((counter*100)+50), 400)
         humanArray.append(tempHuman)
         counter += 1    
     counter = 0
     while counter != NUMBER_OF_ZOMBIES:
         filename = 'Zombie'.__add__(str(counter+1)).__add__(".gif")
         tempZombie = Objects.Mob('zombie', 'lobby', filename, False)
-        tempImage = pygame.image.load(filename)
-        zombieImageArray.append(tempImage)
+        tempZombie.set_position((1024-50)-(counter*100), 400)
+    
         zombieArray.append(tempZombie)
         counter += 1
     counter = 0
@@ -52,26 +48,46 @@ def main():
     
     
     while running:
+        
         for event in pygame.event.get():
+            selected_mob = None
             if event.type == pygame.QUIT:
                 sys.exit()
+            if pygame.mouse.get_pressed() == (True, False, False):
+                counter = 0
+                mouse_position = pygame.mouse.get_pos()
+                selected_mob = None
+                while counter < NUMBER_OF_HUMANS:
+                    x_tolerance = humanArray[counter].CHARACTER_WIDTH 
+                    y_tolerance = humanArray[counter].CHARACTER_HEIGHT
+                    x,y = humanArray[counter].get_position
+                    location_rect = pygame.Rect(x, y , x+x_tolerance, y+y_tolerance )
+                    if location_rect.collidepoint(mouse_position):
+                        selected_mob = humanArray[counter]
+                while counter < NUMBER_OF_ZOMBIES:
+                    x_tolerance = zombieArray[counter].CHARACTER_WIDTH 
+                    y_tolerance = zombieArray[counter].CHARACTER_HEIGHT
+                    x,y = zombieArray[counter].get_position
+                    location_rect = pygame.Rect(x, y , x+x_tolerance, y+y_tolerance )
+                    if location_rect.collidepoint(mouse_position):
+                        selected_mob = humanArray[counter]
+            
+                
+                
         print ''+current_location.image_path
         background = pygame.image.load(current_location.image_path).convert()
         screen.blit(background, (0, 0))
         print 'current location is ' +current_location.name + ' and human location is ' +humanArray[0].location
-        if humanArray[0].location == current_location.name :
-            screen.blit(humanImageArray[0], (50, 400))
-        if humanArray[1].location == current_location.name :
-            screen.blit(humanImageArray[1], (150, 400))
-        if humanArray[2].location == current_location.name :
-            screen.blit(humanImageArray[2], (250, 400))
-        
-        if zombieArray[0].location == current_location.name :
-            screen.blit(zombieImageArray[0], (725, 400))
-        if zombieArray[1].location == current_location.name :
-            screen.blit(zombieImageArray[1], (825, 400))
-        if zombieArray[2].location == current_location.name :
-            screen.blit(zombieImageArray[2], (925, 400))
+        counter = 0
+        while counter < NUMBER_OF_HUMANS:
+            tempImage = pygame.image.load(humanArray[counter].image).convert()
+            screen.blit(tempImage, (humanArray[counter].get_position()))           
+            counter += 1
+        while counter < NUMBER_OF_ZOMBIES:
+            tempImage = pygame.image.load(zombieArray[counter].image).convert()
+            screen.blit(tempImage, (zombieArray[counter].get_position))           
+            counter += 1
+    
         
         pygame.display.update()
         
@@ -83,7 +99,10 @@ def main():
         #Move mobs from one place to another
         #Check previous location for either loss or win   
 
-   
+def move_mob(mob, from_location, to_location):
+    from_location.remove_mob(mob)
+    to_location.add_mob(mob)
+    
 
 
 if __name__ == '__main__':
