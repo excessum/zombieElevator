@@ -2,93 +2,159 @@ import pygame
 
 import Objects
 import sys
-        
+
+SCREEN_WIDTH = 1024
+SCREEN_HEIGHT = 768   
+screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
+human1 = Objects.Mob('human', 'lobby', 'Human1.png')
+human2 = Objects.Mob('human', 'lobby', 'Human2.png')
+human3 = Objects.Mob('human', 'lobby', 'Human3.png')
+zombie1 = Objects.Mob('zombie', 'lobby', 'Zombie1.png')
+zombie2 = Objects.Mob('zombie', 'lobby', 'Zombie2.png')
+zombie3 = Objects.Mob('zombie', 'lobby', 'Zombie3.png')
+elevator = Objects.Elevator('elevator')
+LOBBY_ELEVATOR_POSITION = (10,550) #PLACEHOLDER FOR POSITION OF ELEVATOR AT LOBBY
+PENTHOUSE_ELEVATOR_POSITION = (5,0) #PLACEHODLER FOR POSITION OF ELEVATOR AT LOBBY
+elevator.set_position(LOBBY_ELEVATOR_POSITION)
 def main():
-    SCREEN_WIDTH = 1024
-    SCREEN_HEIGHT = 558
-    NUMBER_OF_HUMANS = 3
-    NUMBER_OF_ZOMBIES = 3
-    humanArray = []
-    zombieArray = []
-    counter = 0
-    print 'hello'
-   
-    
-    elevator = Objects.Elevator('elevator' , "elevator.png")
-    #elevator.__init__('elevator' , "elevator.png")
-    lobby = Objects.Location('lobby' , "lobby.png")
-    #lobby.__init__('lobby' , "lobby.png")
-    penthouse = Objects.Location ('penthouse' , "penthouse.png")
-    #penthouse.__init__('penthouse' , "penthouse.png")
-    current_location = lobby
+    lobby = Objects.Location('lobby')
+    penthouse = Objects.Location ('penthouse')
     running = 1
     
     
-    #CHARACTER_WIDTH = 64
-    #CHARACTER_HEIGHT = 128
     
-    screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
-    while counter != NUMBER_OF_HUMANS:
-        filename = 'Human'.__add__(str(counter+1)).__add__(".gif")
-        tempHuman = Objects.Mob('human', 'lobby', filename, False)
-        #tempHuman.__init__('human', 'lobby', filename, False)
-        tempHuman.set_position(((counter*100)+50), 400)
-        humanArray.append(tempHuman)
-        counter += 1    
-    counter = 0
-    while counter != NUMBER_OF_ZOMBIES:
-        filename = 'Zombie'.__add__(str(counter+1)).__add__(".gif")
-        tempZombie = Objects.Mob('zombie', 'lobby', filename, False)
-        tempZombie.set_position((1024-50)-(counter*100), 400)
-    
-        zombieArray.append(tempZombie)
-        counter += 1
-    counter = 0
-    
+    lobby.add_mob(human1)
+    lobby.add_mob(human2)
+    lobby.add_mob(human3)
+    lobby.add_mob(zombie1)
+    lobby.add_mob(zombie2)
+    lobby.add_mob(zombie3)
+    human1.set_position(50, 400)
+    human2.set_position(150, 400)
+    human3.set_position(250,400)
+    zombie1.set_position(975, 400)
+    zombie2.set_position(875, 400)
+    zombie3.set_position(775, 400)
+    selected_mob = human1
     
     
     while running:
-        
         for event in pygame.event.get():
-            selected_mob = None
             if event.type == pygame.QUIT:
                 sys.exit()
-            if pygame.mouse.get_pressed() == (True, False, False):
-                counter = 0
-                mouse_position = pygame.mouse.get_pos()
-                selected_mob = None
-                while counter < NUMBER_OF_HUMANS:
-                    x_tolerance = humanArray[counter].CHARACTER_WIDTH 
-                    y_tolerance = humanArray[counter].CHARACTER_HEIGHT
-                    x,y = humanArray[counter].get_position
-                    location_rect = pygame.Rect(x, y , x+x_tolerance, y+y_tolerance )
-                    if location_rect.collidepoint(mouse_position):
-                        selected_mob = humanArray[counter]
-                while counter < NUMBER_OF_ZOMBIES:
-                    x_tolerance = zombieArray[counter].CHARACTER_WIDTH 
-                    y_tolerance = zombieArray[counter].CHARACTER_HEIGHT
-                    x,y = zombieArray[counter].get_position
-                    location_rect = pygame.Rect(x, y , x+x_tolerance, y+y_tolerance )
-                    if location_rect.collidepoint(mouse_position):
-                        selected_mob = humanArray[counter]
-            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    selected_mob = human1
+                    print 'human 1 selected'
+                elif event.key == pygame.K_2:
+                    selected_mob = human2
+                    print 'human 2 selected'
+                elif event.key == pygame.K_3:
+                    selected_mob = human3
+                    print 'human 3 selected'
+                elif event.key == pygame.K_4:
+                    selected_mob = zombie3
+                    print 'zombie 1 selected'
+                elif event.key == pygame.K_5:
+                    selected_mob = zombie2
+                    print 'zombie 2 selected'
+                elif event.key == pygame.K_6:
+                    selected_mob = zombie1
+                    print 'zombie 3 selected'
+                if event.key == pygame.K_LEFT:
+                    print 'left key pressed'
+                    if selected_mob.get_location() != "elevator":    
+                        if selected_mob.get_location() == "lobby":
+                            if elevator.current_location == "lobby":
+                                if elevator.check_full() == False:
+                                    lobby.remove_mob(selected_mob)
+                                    elevator.add_mob(selected_mob)
+                                    x, y = LOBBY_ELEVATOR_POSITION
+                                    selected_mob.set_position(x,y) #PLACE HOLDER FOR WHERE GROUND ELEVATOR IS LOCATE
+                            else:
+                                if elevator.current_location == "penthouse":
+                                    if elevator.check_full():
+                                        penthouse.remove_mob(selected_mob)
+                                        elevator.add_mob(selected_mob)
+                                        selected_mob.set_pos(PENTHOUSE_ELEVATOR_POSITION) # PLACE HOLDER FOR PENTHOUSE ELEVATOR
+                if event.key == pygame.K_RIGHT:
+                    print 'right key pressed'
+                    if selected_mob.get_location() == elevator:
+                        if elevator.current_location == "lobby":
+                            selected_mob.set_position(0,0) # PLACE THE MOB IN THE LOBBY
+                            elevator.remove_mob(selected_mob)
+                            lobby.add_mob(selected_mob)
+                        else:
+                            selected_mob.set_position(0,0) # PLACE THE MOB IN THE PENTHOUSE
+                            elevator.remove_mob(selected_mob)
+                            lobby.add_mob(selected_mob)
+                        if elevator.mobs_at_location.__len__() == 0:
+                            if penthouse.get_number_of_mobs_at_location() == 6:
+                                victory()
+                            else:
+                                loop_counter = 0
+                                z_counter = 0
+                                h_counter = 0
+                                #################################################
+                                ####    Loop through penthouse to check for   ###
+                                ####        victory or defeat conditions      ###
+                                #################################################
+                                while loop_counter < penthouse.get_number_of_mobs_at_location():                     
+                                    if penthouse.mobs_at_location[loop_counter].get_type == 'zombie':
+                                        z_counter += 1
+                                    else:
+                                        h_counter += 1
+                                    loop_counter +=1
+                                                                       
+                                if z_counter > h_counter:
+                                    game_over()
+                                #################################################
+                                ###########Reset all the counters################
+                                ################################################# 
+                                loop_counter = 0
+                                z_counter = 0
+                                h_counter = 0
+                                
+                                #################################################
+                                ####       Loop through lobby to check for    ###
+                                ####        victory or defeat conditions      ###
+                                #################################################
+                            
+                                while loop_counter < lobby.get_number_of_mobs_at_location():
+                                    if penthouse.mobs_at_location[loop_counter].get_type == 'zombie':
+                                        z_counter += 1
+                                    else:
+                                        h_counter += 1
+                                    loop_counter +=1
+                                                                       
+                                if z_counter > h_counter:
+                                    game_over()
+                                
+                if event.key == pygame.K_UP:
+                    if elevator.current_location == 'lobby':
+                        if elevator.get_number_of_mobs_at_location() == 0:
+                            pass
+                        else:
+                            move_elevator('up')
+                            elevator.move()
+                if event.key == pygame.K_DOWN:
+                    if elevator.current_location == 'penthouse':
+                        if elevator.get_number_of_mobs_at_location() == 0:
+                            pass
+                        else:
+                            move_elevator('down')
+                            elevator.move()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    print pygame.mouse.get_pos()
                 
-                
-        print ''+current_location.image_path
-        background = pygame.image.load(current_location.image_path).convert()
-        screen.blit(background, (0, 0))
-        print 'current location is ' +current_location.name + ' and human location is ' +humanArray[0].location
-        counter = 0
-        while counter < NUMBER_OF_HUMANS:
-            tempImage = pygame.image.load(humanArray[counter].image).convert()
-            screen.blit(tempImage, (humanArray[counter].get_position()))           
-            counter += 1
-        while counter < NUMBER_OF_ZOMBIES:
-            tempImage = pygame.image.load(zombieArray[counter].image).convert()
-            screen.blit(tempImage, (zombieArray[counter].get_position))           
-            counter += 1
-    
         
+        background = pygame.image.load('background.jpg').convert()
+        screen.blit(background, (0, 0))
+        
+        
+        
+    
+        repaint()
         pygame.display.update()
         
         #Wait until mouse clicked on Mob object
@@ -103,8 +169,57 @@ def move_mob(mob, from_location, to_location):
     from_location.remove_mob(mob)
     to_location.add_mob(mob)
     
+def victory():
+    #Do victory procedure
+    print 'victory!'
 
+def game_over():
+    #Do game over procedure
+    print 'game over!'
 
+def move_elevator(direction):
+    e_starting_pos_x, e_starting_pos_y = (LOBBY_ELEVATOR_POSITION)
+    e_end_pos_x, e_end_pos_y = (PENTHOUSE_ELEVATOR_POSITION)
+    m1_starting_pos_x, m1_starting_pos_y = (0,0)    
+    m1_end_pos_y = m1_starting_pos_y - (e_starting_pos_y - e_end_pos_y)
+    m2_starting_pos_x, m2_starting_pos_y = (0,0)
+    m2_end_pos_y = m2_starting_pos_y - (e_starting_pos_y - e_end_pos_y)
+    count = 0
+    while count < elevator.mobs_at_location.__len__():
+        m1_starting_pos_x, m1_starting_pos_y = elevator.mobs_at_location[count].get_position()
+        m2_starting_pos_x, m2_starting_pos_y = elevator.mobs_at_location[count].get_position()
+    count = 0
+    if direction == 'up':
+        while e_starting_pos_y < e_end_pos_y:
+            if (e_starting_pos_y + 5) < e_end_pos_y:
+                elevator.mobs_at_location[0].set_pos(m1_starting_pos_x, m1_starting_pos_y-m1_end_pos_y)
+                elevator.mobs_at_location[1].set_pos(m2_starting_pos_x, m2_starting_pos_y-m2_end_pos_y)
+                elevator.set_position(PENTHOUSE_ELEVATOR_POSITION)
+            elevator.mobs_at_location[1].set_pos(m2_starting_pos_x, m2_starting_pos_y-(count*5-5))
+            elevator.mobs_at_location[0].set_pos(m1_starting_pos_x, m1_starting_pos_y-(count*5-5))
+            elevator.set_position(e_starting_pos_x, e_starting_pos_y-(count*5-5))
+            repaint()
+            pygame.display.update()
+    if direction == 'down':
+        while e_starting_pos_y > e_end_pos_y:
+            if (e_starting_pos_y + 5) > e_end_pos_y:
+                elevator.mobs_at_location[0].set_pos(m1_starting_pos_x, m1_starting_pos_y+m1_end_pos_y)
+                elevator.mobs_at_location[1].set_pos(m2_starting_pos_x, m2_starting_pos_y+m1_end_pos_y)
+                elevator.set_position(LOBBY_ELEVATOR_POSITION)
+            elevator.mobs_at_location[1].set_pos(m2_starting_pos_x, m2_starting_pos_y-(count*5-5))
+            elevator.mobs_at_location[0].set_pos(m1_starting_pos_x, m1_starting_pos_y-(count*5-5))
+            elevator.set_position(e_starting_pos_x, m1_starting_pos_y-(count*5-5))
+            repaint()
+            pygame.display.update()     
+        elevator.move()
+def repaint():
+    screen.blit(human1.get_image(), human1.get_position())
+    screen.blit(human2.get_image(), human2.get_position())
+    screen.blit(human3.get_image(), human3.get_position())
+    screen.blit(zombie1.get_image(), zombie1.get_position())
+    screen.blit(zombie2.get_image(), zombie2.get_position())
+    screen.blit(zombie3.get_image(), zombie3.get_position())
+    screen.blit(elevator.get_image(), elevator.elevator_position)
 if __name__ == '__main__':
     main()
     

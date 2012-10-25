@@ -1,17 +1,18 @@
+import pygame
+
+MOB_WIDTH = 64
+MOB_HEIGHT = 128
 class Mob():
-    MOB_WIDTH = 64
-    MOB_HEIGHT = 128
     mob_position = 0,0
     mob_type = ""
     location = ""
     image = 'fileDir'
-    animated = False
+    #animated = False
     
-    def __init__(self, mob_type, location, images, animated):
+    def __init__(self, mob_type, location, images):
         self.type = type
         self.location = location
         self.image = images
-        self.animated = animated
     def set_location(self, new_location):
         self.location = new_location
     def set_position(self, x, y):
@@ -21,7 +22,7 @@ class Mob():
     def get_type(self):
         return self.type
     def get_image(self):
-        return self.image
+        return pygame.image.load(self.image).convert()
     def get_position(self):
         return self.mob_position
     
@@ -30,16 +31,16 @@ class Location():
     
     name = ""
     mobs_at_location = []
-    image_path = ""
-    def __init__(self, location_name, image_directory):
+    def __init__(self, location_name):
         self.name = location_name
-        self.image_path = image_directory
         
     
     def remove_mob(self, Mob):
         self.mobs_at_location.remove(Mob)
     def add_mob(self, Mob):
         self.mobs_at_location.append(Mob)
+    def add_mobs(self, mobArray):
+        self.mobs_at_location.append(mobArray)
     def get_mobs(self):
         return self.mobs_at_location
     def get_number_of_mobs_at_location(self):
@@ -48,9 +49,10 @@ class Location():
     
         
 class Elevator(Location):
+    image_path = "lift.jpg"
     Location.name = "elevator"
-    full = False
     current_location = "lobby"
+    elevator_position = (0,0)
     
     
     def move(self):
@@ -59,10 +61,13 @@ class Elevator(Location):
             self.current_location = "penthouse"
         else:
             self.current_location = "lobby"
-            
+    def set_position(self, position_in):
+        self.elevator_position = position_in
     def check_full(self):
         if(len(Location.mobs_at_location) == 2):
-            self.full = True
             return True
         else:
             return False
+    def get_image(self):
+        return pygame.image.load(self.image_path).convert()    
+    
